@@ -43,7 +43,9 @@ jobs:
     
     - name: Install dependencies
       working-directory: okul-app
-      run: npm install
+      run: |
+        npm install --legacy-peer-deps
+        npm audit fix --force || true
     
     - name: Sync www files
       working-directory: okul-app
@@ -54,8 +56,10 @@ jobs:
     - name: Prepare Cordova platform
       working-directory: okul-app
       run: |
+        cordova platform list
         cordova platform rm android || true
-        cordova platform add android@14
+        cordova platform add android@12
+        cordova plugin list
     
     - name: Build Debug APK
       working-directory: okul-app
