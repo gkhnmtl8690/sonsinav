@@ -1,0 +1,102 @@
+name: Build APK
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: 'okul-app/package-lock.json'
+    
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+    
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+      with:
+        cmdline-tools-version: 8512546
+        accept-android-sdk-licenses: true
+    
+    - name: Install Cordova
+      run: |
+        npm install -g cordova@12
+        cordova telemetry off
+        which cordova
+        cordova -v
+    
+    - name: Install dependencies
+      working-directory: okul-app
+      run: npm install
+    
+    - name: Sync www files
+      working-directory: okul-app
+      run: |
+        cp -r ../HTML-CSS-JS-Static/* www/
+        rm -f www/server.js www/package*.json
+    
+    - name: Prepare Cordova platform
+      working-directory: okul-app
+      run: |
+        cordova platform rm android || true
+        cordova platform add android@14
+    
+    - name: Build Debug APK
+      working-directory: okul-app
+      run: cordova build android --debug
+    
+    - name: Build Release APK
+      working-directory: okul-app
+      run: cordova build android --release
+    
+    - name: Upload Debug APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: debug-apk
+        path: okul-app/platforms/android/app/build/outputs/apk/debug/app-debug.apk
+        retention-days: 30
+    
+    - name: Upload Release APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: release-apk
+        path: okul-app/platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
+        retention-days: 30
+    
+    - name: Create Release
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: v${{ github.run_number }}
+        name: "Okul Yönetim Sistemi v${{ github.run_number }}"
+        body: |
+          🎓 Okul Yönetim Sistemi - Otomatik APK Build
+          
+          📱 **İndirme Linkleri:**
+          - Debug APK: Test için kullanın
+          - Release APK: Üretim için kullanın
+          
+          🔧 **Bu sürümde:** Güncel HTML/CSS/JS dosyaları
+        files: |
+          okul-app/platforms/android/app/build/outputs/apk/debug/app-debug.apk
+          okul-app/platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

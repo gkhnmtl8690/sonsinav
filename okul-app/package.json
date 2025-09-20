@@ -1,0 +1,28 @@
+{
+  "name": "okul-yonetim-sistemi",
+  "version": "1.0.0",
+  "description": "Okul yönetimi için kapsamlı uygulama",
+  "scripts": {
+    "build": "cordova build android",
+    "build:release": "cordova build android --release",
+    "build:debug": "cordova build android --debug",
+    "platform:add": "cordova platform add android",
+    "prepare": "cordova prepare"
+  },
+  "devDependencies": {
+    "cordova-plugin-file": "^6.0.2",
+    "cordova-plugin-file-opener2": "^4.0.0",
+    "cordova-plugin-network-information": "2",
+    "cordova-plugin-splashscreen": "5",
+    "cordova-plugin-whitelist": "1"
+  },
+  "cordova": {
+    "plugins": {
+      "cordova-plugin-whitelist": {},
+      "cordova-plugin-splashscreen": {},
+      "cordova-plugin-network-information": {},
+      "cordova-plugin-file": {},
+      "cordova-plugin-file-opener2": {}
+    }
+  }
+}
