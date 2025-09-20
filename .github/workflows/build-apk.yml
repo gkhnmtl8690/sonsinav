@@ -50,9 +50,10 @@ jobs:
         cp -r ../HTML-CSS-JS-Static/* www/
         rm -f www/server.js www/package*.json
     
-    - name: Prepare Cordova platform
+        - name: Prepare Cordova platform
       working-directory: okul-app
       run: |
+        cordova platform rm android || true
         cordova platform add android@10.1.2
     
     - name: Build Debug APK
