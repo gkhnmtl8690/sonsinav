@@ -36,6 +36,7 @@ jobs:
       working-directory: okul-app
       run: |
         npm install
+        cordova platform rm android
         cordova platform add android@9.1.0
         cordova build android --debug
         
