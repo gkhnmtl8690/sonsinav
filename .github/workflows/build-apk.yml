@@ -18,7 +18,7 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '18'
+        node-version: '16'
         cache: 'npm'
         cache-dependency-path: 'okul-app/package-lock.json'
     
@@ -26,7 +26,7 @@ jobs:
       uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
-        java-version: '17'
+        java-version: '11'
     
     - name: Setup Android SDK
       uses: android-actions/setup-android@v3
@@ -36,16 +36,13 @@ jobs:
     
     - name: Install Cordova
       run: |
-        npm install -g cordova@12
+        npm install -g cordova@11.1.0
         cordova telemetry off
-        which cordova
-        cordova -v
     
     - name: Install dependencies
       working-directory: okul-app
       run: |
         npm install --legacy-peer-deps
-        npm audit fix --force || true
     
     - name: Sync www files
       working-directory: okul-app
@@ -56,18 +53,11 @@ jobs:
     - name: Prepare Cordova platform
       working-directory: okul-app
       run: |
-        cordova platform list
-        cordova platform rm android || true
-        cordova platform add android@12
-        cordova plugin list
+        cordova platform add android@10.1.2
     
     - name: Build Debug APK
       working-directory: okul-app
       run: cordova build android --debug
-    
-    - name: Build Release APK
-      working-directory: okul-app
-      run: cordova build android --release
     
     - name: Upload Debug APK
       uses: actions/upload-artifact@v4
@@ -75,32 +65,3 @@ jobs:
         name: debug-apk
         path: okul-app/platforms/android/app/build/outputs/apk/debug/app-debug.apk
         retention-days: 30
-    
-    - name: Upload Release APK
-      uses: actions/upload-artifact@v4
-      with:
-        name: release-apk
-        path: okul-app/platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
-        retention-days: 30
-    
-    - name: Create Release
-      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      uses: softprops/action-gh-release@v1
-      with:
-        tag_name: v${{ github.run_number }}
-        name: "Okul Yönetim Sistemi v${{ github.run_number }}"
-        body: |
-          🎓 Okul Yönetim Sistemi - Otomatik APK Build
-          
-          📱 **İndirme Linkleri:**
-          - Debug APK: Test için kullanın
-          - Release APK: Üretim için kullanın
-          
-          🔧 **Bu sürümde:** Güncel HTML/CSS/JS dosyaları
-        files: |
-          okul-app/platforms/android/app/build/outputs/apk/debug/app-debug.apk
-          okul-app/platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
-        draft: false
-        prerelease: false
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
