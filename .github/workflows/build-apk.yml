@@ -36,7 +36,6 @@ jobs:
       working-directory: okul-app
       run: |
         npm install
-        cordova platform add android
         cordova build android --debug
         
     - name: Upload APK
